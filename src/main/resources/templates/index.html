@@ -1,6 +1,80 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymleaf.org">
-<body>
-<h2>Hello World!</h2>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" rel="stylesheet">
+    <title>nippo</title>
+  </head>
+  <body>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<div id="contents">
+		<div class="columns" style="padding-top: 15%">
+			<div class="column is-one-quarter"></div>
+			<div class="column is-one-quarter"></div>
+			<div class="column is-one-quarter">
+				<div class="card">
+					<form method="post">
+						<div class="card-content">
+								<div class="field">
+									<label>UserID</label>
+									<div class="control">
+										<input class="input" type="text" id="userId" name="userId" placeholder="user ID">
+										<span class="icon is-small is-left">
+											<i class="fas fa-user"></i>
+										</span>
+									</div>
+								</div>
+								<div class="field">
+									<label>password</label>
+									<div class="control">
+										<input class="input" type="text" id="password" name="password" placeholder="password">
+									</div>
+								</div>
+						</div>
+						<footer class="card-footer" style="height: 50px">
+							<div class="field is-clearfix">
+								<div class="control is-clearfix">
+									<button class="button is-primary" id="loginButton">Sign Up</button>
+								</div>
+							</div>
+						</footer>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(function(){
+			$('#loginButton').on('click', function(e){
+				e.preventDefault();
+				var userId = $('#userId').val();
+				var password = $('#password').val();
+
+				var errorLog = inputCheck(userId, password);
+				if(errorLog.length > 0) {
+					for(let msg of errorLog) {
+						console.log(msg);
+					}
+					return false;
+				}
+
+				var form = $('form:first');
+				form.attr('action', 'http://localhost:82/nippo/dashboard');
+				form.submit();
+
+			});
+
+			function inputCheck(userId, password) {
+				var errorMsg = [];
+				if(userId === '') {
+					errorMsg.push("ユーザIDが未入力です。");
+				}
+				if(password === '') {
+					errorMsg.push("パスワードが未入力です。");
+				}
+				return errorMsg;
+			}
+		});
+	</script>
+  </body>
 </html>

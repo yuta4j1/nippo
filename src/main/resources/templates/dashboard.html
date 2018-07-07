@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css" rel="stylesheet">
+<script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<title>nippo</title>
+</head>
+<body>
+<nav class="navbar is-light is-spaced">
+	<div class="navbar-brand">
+		<div class="nav-item">
+			<span class="icon">
+				<i class="fas fa-archive fa-2x"></i>  <font size="5">Nippo</font>
+			</span>
+		</div>
+		<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+			<span aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
+		</a>
+	</div>
+	<div class="navbar-menu">
+		<div class="navbar-start">
+			<a class="nav-item">Home</a>
+		</div>
+		<div class="navbar-end">
+			<div class="navbar-item">
+				<div class="field">
+					<div class="control">
+						<button class="button is-success" id="newNoteModal">
+							<span class="icon">
+								<i class="fas fa-edit"></i>
+							</span>
+							<span>新規作成</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</nav>
+<div id="search-area" class="columns is-desktop" style="padding-top: 2%">
+	<div class="column is-one-quarter-desktop"></div>
+	<div class="column is-half-desktop">
+		<div class="card">
+			<header class="card-header">
+				<p class="card-header-title">検索条件</p>
+			</header>
+			<div class="card-content">
+				<div class="columns">
+					<div class="column">
+						<div class="field">
+							<label class="label">タイトル</label>
+							<input class="input" type="text">
+						</div>
+					</div>
+					<div class="column">
+						<div class="field">
+							<label class="label">タグ</label>
+							<input class="input" type="text">
+						</div>
+					</div>
+				</div>
+				<div class="columns">
+					<div class="column">
+						<div class="field">
+						<label class="label">投稿日時</label>
+							<input class="input" type="text">
+						</div>
+					</div>
+					<div class="column"></div>
+				</div>
+			</div>
+			<footer class="card-footer" style="height: 10%">
+				<div class="card-footer-item">
+					<div class="columns">
+						<div class="column is-12"></div>
+						<div class="column">
+							<button class="button is-info">
+							<div class="icon">
+								<i class="fas fa-search"></i>
+							</div>
+							<p>検索</p>
+							</button>
+						</div>
+						<div class="column">
+							<button class="button">クリア</button>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+	<div class="column is-one-quarter-desktop"></div>
+</div>
+<div class="modal note-modal">
+	<div class="modal-background"></div>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">ノートの追加</p>
+			<button class="delete mod-close" aria-label="close"></button>
+		</header>
+		<section class="modal-card-body">
+		<!-- Content ... -->
+		</section>
+		<footer class="modal-card-foot">
+			<button class="button is-success">Save changes</button>
+			<button class="button mod-close">Cancel</button>
+		</footer>
+	</div>
+</div>
+<script>
+	$(function() {
+		$('#newNoteModal').on('click', function() {
+			$('.note-modal').addClass('is-active');
+		});
+
+		$('.mod-close').on('click', function() {
+			$('.note-modal').removeClass('is-active');
+		});
+
+	});
+</script>
+</body>
+</html>
