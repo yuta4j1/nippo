@@ -96,7 +96,7 @@
 	</div>
 	<div class="column is-one-quarter-desktop"></div>
 </div>
-<div class="modal note-modal">
+<div class="modal note-modal" id="edit">
 	<div class="modal-background"></div>
 	<div class="modal-card">
 		<header class="modal-card-head">
@@ -105,14 +105,7 @@
 		</header>
 		<!-- モーダル画面ボディ部 -->
 		<section class="modal-card-body">
-			<div class="message">
-			<!-- TODO メッセージ情報をどうするか -->
-				<div class="notification is-info">
-					<button class="delete"></button>
-
-
-				</div>
-			</div>
+			<div class="message"></div>
 			<div class="field">
 				<div class="control">
 					<label class="checkbox">
@@ -133,7 +126,7 @@
 					</div>
 				</div>
 				<div class="control">
-					<a class="button is-primary" id="tagAdd">タグ追加</a>
+					<a class="button is-primary" id="tagAddButton">タグ追加</a>
 				</div>
 			</div>
 			<div class="field">
@@ -144,11 +137,16 @@
 					<textarea class="textarea is-info" type="text" placeholder="Input text" rows="20" id="mainText"></textarea>
 				</div>
 			</div>
+			<div class="field">
+				<div class="control">
+					<input class="input" type="text" placeholder="Comment" id="comment" />
+				</div>
+			</div>
 		</section>
 		<footer class="modal-card-foot">
 			<div class="field is-grouped is-grouped-right">
 				<p class="control">
-					<a class="button is-success">登録</a>
+					<a class="button is-success" id="submitButton">登録</a>
 				</p>
 				<p class="control">
 					<a class="button mod-close">閉じる</a>
@@ -159,23 +157,46 @@
 </div>
 <script>
 	$(function() {
-		// サーバよりタグ項目取得
-		var tags = ['apple', 'banana', 'strawberry'];
-		for (var index in tags) {
-			var tagVal = tags[index];
-			$('.tag-select').append($('<option>').val(tagVal).text(tagVal));
-		}
 
-		$('#tagAdd').on('click', function() {
+		// バックエンドよりタグ項目取得
+		getCategories().then(function(tags) {
+			// タグが存在しなければボタンは非活性。
+			if (tags.length === 0) {
+				$('#tagAddButton').prop('disabled', true);
+			}
+			$('#tagAddButton').addClass('disabled');
+			console.log("tags : ", tags);
+			for (var index in tags) {
+				var tagVal = tags[index].categoryName;
+				$('.tag-select').append($('<option>').val(tagVal).text(tagVal));
+			}
+		}).then(function(error) {
+			// TODO エラー時、メッセージのセット
+		});
+
+		$('#tagAddButton').on('click', function() {
 			var tagNum = $('.tag-area span').length;
 			// タグは５つ以上追加できない
 			if (tagNum >= 5) return;
 			var selectedVal = $('.tag-select').val();
-			$('.tag-area').append('<span class="tag is-light" style="margin-right: 5px">' + selectedVal + '<button class="delete is-small"></button></span>');
+			$('.tag-area').append('<div class="tag-label" style="display: inline-block">' +
+			'<span class="tag is-light" style="margin-right: 5px">' + selectedVal + '<button class="delete is-small del-tab-label"></button></span></div>');
+			addTagDelEvent();
 		});
 
-		$('.delete is-small').on('click', function() {
-			$(this).parent().remove();
+		$('#submitButton').on('click', function(e) {
+			e.preventDefault();
+			const id = $('.modal').attr('id');
+			console.log("modal id", id);
+			if (id == 'edit') {
+				// TODO 入力チェック
+				createNotification('confirm');
+				$('.modal note-modal').attr('id', 'confirm');
+			} else if (id == 'confirm') {
+
+				$('.modal note-modal').attr('id', 'done');
+			}
+
 		});
 
 		$('#newNoteModal').on('click', function() {
@@ -187,18 +208,102 @@
 			modalFormClear();
 		});
 
+		function doRequest(url, query, requestType) {
+
+			var baseUrl = 'http://localhost:82/nippo/';
+
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					type: requestType,
+					url: baseUrl + url,
+					data: query,
+					dataType: 'json'
+				}).then(function(data) {
+					resolve(data);
+				}).then(function(error) {
+					reject(error);
+				});
+			});
+		}
+
+		function doGetRequest(url, query) {
+			return doRequest(url, query, 'GET');
+		}
+
+		function doPostRequest(url, query) {
+			return doRequest(url, query, 'POST');
+		}
+
 		function getCategories() {
-			$.ajax({
-				type: 'POST',
-				url: 'http://localhost:82/nippo/category/search',
-				dataType: 'json'
-			})
+			var url = 'category/search';
+			var query = {};
+			return new Promise((resolve, reject) => {
+				doGetRequest(url, query).then(function(data) {
+					var datas = data.data;
+					var categories = [];
+					datas.forEach((val) => {
+						categories.push(val);
+					});
+					resolve(categories);
+				}).then(function(error) {
+					reject(error);
+				});
+			});
+		}
+
+		function addTagDelEvent() {
+			$('.del-tab-label').on('click', function() {
+				$(this).parent().parent().remove();
+			});
 		}
 
 		function modalFormClear() {
 			$('#title').val('');
 			$('#mainText').val('');
 			$('.tag-area').empty();
+		}
+
+		function createNotification(notifyType) {
+			var baseNotify = '<div class="notification ?">?<button class="delete"></button></div>'
+			if (notifyType == 'confirm') {
+				const notifyClass = 'is-info';
+				const message = '下記の情報を登録します。よろしいですか？';
+				var confirmNotify = embedString(baseNotify, notifyClass, message);
+				$('.message').html(confirmNotify);
+
+			} else if (notifyType == 'success') {
+				const notifyClass = 'is-success';
+				const message = 'ノートの登録が正常に終了しました。'; 
+				var successNotify = embedString(baseNotify, notifyClass, message);
+				$('.message').html(successNotify);
+
+			} else if (notifyType == 'error') {
+				const notifyClass = 'is-error';
+				const message = 'ノートの登録に失敗しました。'; 
+				var errorNotify = embedString(baseNotify, notifyClass, message);
+				$('.message').html(errorNotify);
+
+			}
+
+		}
+
+		function embedString() {
+			var args = Array.prototype.slice.call(arguments);
+			var baseArray = args[0].split('?');
+			var strArray = args.slice(1);
+			console.log(baseArray);
+			console.log(strArray);
+			if (baseArray.length == strArray.length) {
+				console.log("embed string failure.");
+				return null;
+			}
+			var resultStr = "";
+			for (var i = 0; i < strArray.length; i++) {
+				resultStr += baseArray[i] + strArray[i];
+			}
+			resultStr += baseArray[baseArray.length - 1];
+			console.log("result string : ", resultStr);
+			return resultStr;
 		}
 
 	});
