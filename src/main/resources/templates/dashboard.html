@@ -109,7 +109,7 @@
 			<div class="field">
 				<div class="control">
 					<label class="checkbox">
-						<input type="checkbox"> Markdownで表示
+						<input type="checkbox" id="isMarkdown"> Markdownで表示
 					</label>
 				</div>
 			</div>
@@ -134,7 +134,7 @@
 			</div>
 			<div class="field">
 				<div class="control">
-					<textarea class="textarea is-info" type="text" placeholder="Input text" rows="20" id="mainText"></textarea>
+					<textarea class="textarea is-info" type="text" placeholder="Input text" rows="20" id="document"></textarea>
 				</div>
 			</div>
 			<div class="field">
@@ -147,6 +147,9 @@
 			<div class="field is-grouped is-grouped-right">
 				<p class="control">
 					<a class="button is-success" id="submitButton">登録</a>
+				</p>
+				<p class="control">
+					<a class="button" id="returnButton">戻る</a>
 				</p>
 				<p class="control">
 					<a class="button mod-close">閉じる</a>
@@ -186,18 +189,39 @@
 
 		$('#submitButton').on('click', function(e) {
 			e.preventDefault();
+			// 戻るボタン表示
+			$('#returnButton').show();
 			const id = $('.modal').attr('id');
 			console.log("modal id", id);
 			if (id == 'edit') {
 				// TODO 入力チェック
-				createNotification('confirm');
-				$('.modal note-modal').attr('id', 'confirm');
+				displayNotification('confirm', '下記の情報を登録します。よろしいですか？');
+				modalStateModify('confirm');
+				$(this).text('決定');
+				console.log("modal id", $('.modal').attr('id'));
 			} else if (id == 'confirm') {
-
-				$('.modal note-modal').attr('id', 'done');
+				addDairyReport().then(function(data) {
+					console.log('result data', data);
+					displayNotification('success', data.message);
+					modalStateModify('done');
+				}).then(function(error) {
+					console.log("error", error);
+					$('.modal note-modal').attr('id', 'done');
+				});
 			}
-
 		});
+
+		$('#returnButton').on('click', function() {
+			modalStateModify('edit');
+			if ($('.modal').attr('id') === 'edit') {
+				$('.notification').remove();
+			}
+			$('#submitButton').text('登録');
+			$(this).hide();
+		});
+
+		// 初期状態では戻るボタンは非表示
+		$('#returnButton').hide();
 
 		$('#newNoteModal').on('click', function() {
 			$('.note-modal').addClass('is-active');
@@ -217,6 +241,7 @@
 					type: requestType,
 					url: baseUrl + url,
 					data: query,
+					contentType: 'application/json',
 					dataType: 'json'
 				}).then(function(data) {
 					resolve(data);
@@ -251,6 +276,55 @@
 			});
 		}
 
+		async function addDairyReport() {
+			var url = 'add';
+			var query = {
+				id: 0,
+				title: getVal('#title', 'text'),
+				tag: getStrTag('.tag', 'tag'),
+				document: getVal('#document', 'text'),
+				comment: getVal('#comment', 'text'),
+				markdown: getVal('#isMarkdown', 'checkbox'),
+				updatedAt: ''
+			};
+			console.log('addDairyReport.qurey', query);
+			return await doPostRequest(url, JSON.stringify(query));
+		}
+
+		function getVal(selectorKey, type) {
+			var value = '';
+			if (type === 'text') {
+				value = $(selectorKey).val();
+			} else if (type === 'tag') {
+				value = getStrTag(selectorKey);
+			} else if (type === 'checkbox') {
+				if ($(selectorKey).val() === 'on') {
+					value = 1;
+				} else {
+					value = 0;
+				}
+			}
+			return value;
+		}
+
+		function getStrTag(selector) {
+			var strTag = '';
+			const separator = ',';
+			$(selector).text(function(index, val) {
+				if (index === 0) {
+					strTag += val;
+				} else {
+					strTag += separator + val ;	
+				}
+			});	
+			return strTag;
+		}
+
+		/* modalの状態変更 */
+		function modalStateModify(state) {
+			$('.modal').attr('id', state);
+		}
+
 		function addTagDelEvent() {
 			$('.del-tab-label').on('click', function() {
 				$(this).parent().parent().remove();
@@ -259,32 +333,40 @@
 
 		function modalFormClear() {
 			$('#title').val('');
-			$('#mainText').val('');
+			$('#document').val('');
+			$('#comment').val('');
 			$('.tag-area').empty();
+			clearNotification();
 		}
 
-		function createNotification(notifyType) {
+		function displayNotification(notifyType, message) {
+			clearNotification();
+			createNotification(notifyType, message);
+		}
+
+		function createNotification(notifyType, message) {
 			var baseNotify = '<div class="notification ?">?<button class="delete"></button></div>'
 			if (notifyType == 'confirm') {
 				const notifyClass = 'is-info';
-				const message = '下記の情報を登録します。よろしいですか？';
 				var confirmNotify = embedString(baseNotify, notifyClass, message);
 				$('.message').html(confirmNotify);
 
 			} else if (notifyType == 'success') {
 				const notifyClass = 'is-success';
-				const message = 'ノートの登録が正常に終了しました。'; 
 				var successNotify = embedString(baseNotify, notifyClass, message);
 				$('.message').html(successNotify);
 
 			} else if (notifyType == 'error') {
 				const notifyClass = 'is-error';
-				const message = 'ノートの登録に失敗しました。'; 
 				var errorNotify = embedString(baseNotify, notifyClass, message);
 				$('.message').html(errorNotify);
 
 			}
 
+		}
+
+		function clearNotification() {
+			$('.message').empty();
 		}
 
 		function embedString() {
