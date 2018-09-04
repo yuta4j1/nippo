@@ -9,4 +9,11 @@ public class Result {
 	private String message;
 	private Object data;
 
+	public Result() {
+	}
+
+	public Result(boolean success) {
+		this.success = success;
+	}
+
 }
