@@ -2,6 +2,11 @@ package com.yutaka.dayrepo.model.entity;
 
 import java.time.LocalDateTime;
 
+import lombok.Data;
+import lombok.ToString;
+
+@Data
+@ToString
 public class DairyReportEntity {
 
 	private int id;

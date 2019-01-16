@@ -2,8 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yutaka.dayrepo.mapper.DairyReportMapper">
-	<select id="listCategories" resultType="com.yutaka.dayrepo.model.query.DairyReportQuery">
-		SELECT * FROM reports;
+	<select id="listDairyReport" parameterType="com.yutaka.dayrepo.model.query.DairyReportQuery"
+		resultType="com.yutaka.dayrepo.model.entity.DairyReportEntity">
+		SELECT
+			id, title, tag, document,
+			comment, markdown, updated_at
+		FROM dairy_report
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="title != null and title != ''">
+				title = ${title}
+			</if>
+			<if test="tag != null and tag != ''">
+				AND tag = ${tag}
+			</if>
+		</trim>
 	</select>
 
 	<insert id="addDairyReport" parameterType="com.yutaka.dayrepo.model.attribute.DairyReportAttribute">
