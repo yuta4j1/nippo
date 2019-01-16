@@ -1,0 +1,28 @@
+{
+  "name": "nippo-client",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "yuta4j1",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.0",
+    "style-loader": "^0.23.1",
+    "vue-loader": "^15.5.1",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.5.22",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1"
+  },
+  "dependencies": {
+    "vue": "^2.5.22",
+    "vue-router": "^3.0.2"
+  },
+  "scripts": {
+    "build": "webpack --mode=production",
+    "watch": "webpack -w"
+  }
+}
