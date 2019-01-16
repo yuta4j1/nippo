@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.x3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css" rel="stylesheet">
-<script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+<script async src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<script src="https://bulma.io/vendor/native.js"></script>
+<script async src="https://bulma.io/vendor/native.js"></script>
 <title>nippo</title>
 </head>
 <body>
@@ -23,9 +24,9 @@
 		</a>
 	</div>
 	<div class="navbar-menu">
-		<div class="navbar-start">
+		<!-- <div class="navbar-start">
 			<a class="nav-item">Home</a>
-		</div>
+		</div> -->
 		<div class="navbar-end">
 			<div class="navbar-item">
 				<div class="field">
@@ -46,6 +47,7 @@
 	<div class="column is-one-quarter-desktop"></div>
 	<div class="column is-half-desktop">
 		<div class="card">
+		<form method="get" action="dashboard/list" modelAttribute="dairyReportQuery" th:object="${dairyReportQuery}">
 			<header class="card-header">
 				<p class="card-header-title">検索条件</p>
 			</header>
@@ -54,13 +56,13 @@
 					<div class="column">
 						<div class="field">
 							<label class="label">タイトル</label>
-							<input class="input" type="text">
+							<input class="input" type="text" th:field="*{title}">
 						</div>
 					</div>
 					<div class="column">
 						<div class="field">
 							<label class="label">タグ</label>
-							<input class="input" type="text">
+							<input class="input" type="text" th:field="*{tag}">
 						</div>
 					</div>
 				</div>
@@ -68,7 +70,7 @@
 					<div class="column">
 						<div class="field">
 						<label class="label">投稿日時</label>
-							<input class="input" type="text">
+							<input class="input" type="text" th:field="*{updatedAt}">
 						</div>
 					</div>
 					<div class="column"></div>
@@ -79,7 +81,7 @@
 					<div class="columns">
 						<div class="column is-12"></div>
 						<div class="column">
-							<button class="button is-info">
+							<button type="submit" class="button is-info">
 							<div class="icon">
 								<i class="fas fa-search"></i>
 							</div>
@@ -92,15 +94,38 @@
 					</div>
 				</div>
 			</footer>
+			</form>
 		</div>
 	</div>
 	<div class="column is-one-quarter-desktop"></div>
+</div>
+<div id="list-area" th:if="${isReportExists}" class="columns is-vcentered" style="padding-top: 2%">
+	<div class="column is-offset-1">
+		<table class="table is-striped is-fullwidth">
+			<thead>
+				<tr>
+					<th>タイトル</th>
+					<th>カテゴリ</th>
+					<th>投稿日時</th>
+					<th>コメント</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="report : ${reportList}" th:object=${report}>
+					<td th:text="*{title}"></td>
+					<td th:text="*{tag}"></td>
+					<td th:text="*{updatedAt}"></td>
+					<td th:text="*{comment}"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 </div>
 <div class="modal note-modal" id="edit">
 	<div class="modal-background"></div>
 	<div class="modal-card">
 		<header class="modal-card-head">
-			<p class="modal-card-title">ノートの追加</p>
+			<p class="modal-card-title">新規ノート</p>
 			<button class="delete mod-close" aria-label="close"></button>
 		</header>
 		<!-- モーダル画面ボディ部 -->
@@ -109,7 +134,7 @@
 			<div class="field">
 				<div class="control">
 					<label class="checkbox">
-						<input type="checkbox" id="isMarkdown"> Markdownで表示
+						<input type="checkbox" id="isMarkdown"> Markdownモード
 					</label>
 				</div>
 			</div>
@@ -314,9 +339,9 @@
 				if (index === 0) {
 					strTag += val;
 				} else {
-					strTag += separator + val ;	
+					strTag += separator + val ;
 				}
-			});	
+			});
 			return strTag;
 		}
 
